@@ -16,6 +16,9 @@ class SecurityConfig {
             .authorizeHttpRequests { authorize ->
                 authorize
                     .requestMatchers("/api/auth/login-url").permitAll()
+                    .requestMatchers("/api/auth/token").permitAll()
+                    .requestMatchers("/api/user/session").permitAll()
+                    .requestMatchers("/api/user/logout").permitAll()
                     .requestMatchers("/api/hello").permitAll()
                     .anyRequest().authenticated()
             }

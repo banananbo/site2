@@ -1,38 +1,22 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
-import { fetchHelloWorld } from './services/HelloWorldService';
+import HomePage from './pages/HomePage';
+import CallbackPage from './pages/CallbackPage';
+import { AuthProvider } from './context/AuthContext';
 
 function App() {
-  const [message, setMessage] = useState<string>('読み込み中...');
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const getHelloWorld = async () => {
-      try {
-        const data = await fetchHelloWorld();
-        setMessage(data.message);
-      } catch (err) {
-        setError('バックエンドからのデータ取得に失敗しました');
-        console.error('エラー:', err);
-      }
-    };
-
-    getHelloWorld();
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>バックエンドからのメッセージ</h1>
-        {error ? (
-          <div className="error-message">{error}</div>
-        ) : (
-          <div className="message-container">
-            <p className="message">{message}</p>
-          </div>
-        )}
-      </header>
-    </div>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/callback" element={<CallbackPage />} />
+          </Routes>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 
