@@ -8,6 +8,7 @@
 .env.development.local
 .env.test.local
 .env.production.local
+.env.production
 
 # バックエンド関連
 backend/build/
@@ -17,6 +18,8 @@ backend/target/
 backend/bin/
 backend/logs/
 backend/.settings/
+backend/.project
+backend/.classpath
 
 # フロントエンド関連
 frontend/node_modules/
@@ -26,6 +29,8 @@ frontend/coverage/
 frontend/npm-debug.log*
 frontend/yarn-debug.log*
 frontend/yarn-error.log*
+frontend/.pnp
+frontend/.pnp.js
 
 # データベース関連
 db/data/
@@ -33,4 +38,8 @@ db/data/
 
 # Docker関連
 .docker/
-volume/ 
+volume/
+.dockerignore
+
+# 本番環境設定
+.env.production 
