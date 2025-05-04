@@ -126,3 +126,90 @@ summary {
     transform: rotate(360deg);
   }
 }
+
+/* TopBar styles */
+.top-bar {
+  background-color: #2c3e50;
+  color: white;
+  padding: 0;
+  width: 100%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+}
+
+.top-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  height: 60px;
+}
+
+.top-bar-logo {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.top-bar-logo a {
+  color: white;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.top-bar-logo a:hover {
+  color: #3498db;
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  font-weight: 500;
+  margin-right: 8px;
+}
+
+.login-button, .logout-button {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.login-button:hover, .logout-button:hover {
+  background-color: #2980b9;
+}
+
+.logout-button {
+  background-color: transparent;
+  border: 1px solid white;
+}
+
+.logout-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Content padding for fixed header */
+.content-container {
+  padding-top: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}

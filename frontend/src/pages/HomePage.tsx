@@ -1,79 +1,79 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import LoginButton from '../components/LoginButton';
-import { fetchHelloWorld } from '../services/HelloWorldService';
-import { useState, useEffect } from 'react';
+import TopBar from '../components/TopBar';
+import '../App.css';
+
+interface Message {
+  content: string;
+}
 
 const HomePage: React.FC = () => {
-  const { isAuthenticated, logout, tokenInfo } = useAuth();
-  const [message, setMessage] = useState<string>('読み込み中...');
+  const { isAuthenticated, tokenInfo } = useAuth();
+  const [message, setMessage] = useState<Message | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const getHelloWorld = async () => {
+    const fetchMessage = async () => {
+      if (!isAuthenticated) return;
+      
+      setLoading(true);
+      setError(null);
+      
       try {
-        const data = await fetchHelloWorld();
-        setMessage(data.message);
+        const response = await fetch('/api/message', {
+          headers: {
+            'Authorization': `Bearer ${tokenInfo?.accessToken}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error(`エラーが発生しました: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        setMessage(data);
       } catch (err) {
-        setError('バックエンドからのデータ取得に失敗しました');
-        console.error('エラー:', err);
+        setError('メッセージの取得に失敗しました');
+        console.error('メッセージ取得エラー:', err);
+      } finally {
+        setLoading(false);
       }
     };
-
-    getHelloWorld();
-  }, []);
-
-  // JSONをフォーマットして表示する関数
-  const formatJson = (json: any) => {
-    return JSON.stringify(json, null, 2);
-  };
+    
+    fetchMessage();
+  }, [isAuthenticated, tokenInfo]);
 
   return (
-    <div className="home-container">
-      <header className="App-header">
-        <h1>Auth0ログインサンプル</h1>
+    <div>
+      <TopBar />
+      
+      <div className="content-container">
+        <h1>ようこそ、banananbo.comへ</h1>
         
-        {isAuthenticated ? (
-          <div className="authenticated-container">
-            <p>ログイン済みです！</p>
-            <button onClick={logout} className="logout-button">ログアウト</button>
-            
-            {tokenInfo && (
-              <div className="token-info">
-                <h3>トークン情報</h3>
-                <div className="token-details">
-                  <p><strong>タイプ:</strong> {tokenInfo.tokenType}</p>
-                  <p><strong>有効期限:</strong> {tokenInfo.expiresIn}秒</p>
-                  <details>
-                    <summary>ID Token</summary>
-                    <pre className="token-pre">{tokenInfo.idToken}</pre>
-                  </details>
-                  <details>
-                    <summary>Access Token</summary>
-                    <pre className="token-pre">{tokenInfo.accessToken}</pre>
-                  </details>
-                </div>
-              </div>
-            )}
+        {!isAuthenticated ? (
+          <div className="welcome-section">
+            <p>banananbo.comは、あなたのオンラインプラットフォームです。</p>
+            <p>ログインして、すべての機能にアクセスしてください。</p>
           </div>
         ) : (
-          <div className="login-container">
-            <p>ログインしてください</p>
-            <LoginButton />
+          <div className="user-content">
+            <h2>ようこそ、{tokenInfo?.name || 'ユーザー'}さん</h2>
+            <p>ログインに成功しました。</p>
+            
+            {loading ? (
+              <div className="loading">メッセージを読み込み中...</div>
+            ) : error ? (
+              <div className="error-message">{error}</div>
+            ) : message ? (
+              <div className="message-container">
+                <h3>サーバーからのメッセージ:</h3>
+                <p className="message">{message.content}</p>
+              </div>
+            ) : null}
           </div>
         )}
-
-        <div className="message-section">
-          <h2>バックエンドからのメッセージ</h2>
-          {error ? (
-            <div className="error-message">{error}</div>
-          ) : (
-            <div className="message-container">
-              <p className="message">{message}</p>
-            </div>
-          )}
-        </div>
-      </header>
+      </div>
     </div>
   );
 };

@@ -5,19 +5,17 @@ import HomePage from './pages/HomePage';
 import CallbackPage from './pages/CallbackPage';
 import { AuthProvider } from './context/AuthContext';
 
-function App() {
+const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/callback" element={<CallbackPage />} />
-          </Routes>
-        </div>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/callback" element={<CallbackPage />} />
+        </Routes>
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;

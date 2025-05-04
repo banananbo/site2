@@ -5,6 +5,7 @@ interface TokenInfo {
   accessToken: string;
   expiresIn: number;
   tokenType: string;
+  name?: string;
 }
 
 interface AuthContextType {
@@ -15,6 +16,7 @@ interface AuthContextType {
   setAuthCode: (code: string | null) => void;
   setTokenInfo: (tokenInfo: TokenInfo | null) => void;
   logout: () => void;
+  login: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -51,6 +53,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }));
   }, [isAuthenticated, authCode, tokenInfo]);
 
+  const login = async () => {
+    try {
+      // バックエンドからログインURLを取得
+      const response = await fetch('/api/auth/login-url');
+      const data = await response.json();
+      // Auth0のログインページにリダイレクト
+      window.location.href = data.authUrl;
+    } catch (error) {
+      console.error('ログインURLの取得に失敗しました', error);
+    }
+  };
+
   const logout = () => {
     setIsAuthenticated(false);
     setAuthCode(null);
@@ -67,7 +81,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         setIsAuthenticated,
         setAuthCode,
         setTokenInfo,
-        logout
+        logout,
+        login
       }}
     >
       {children}
