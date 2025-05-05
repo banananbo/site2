@@ -65,11 +65,30 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setAuthCode(null);
-    setTokenInfo(null);
-    localStorage.removeItem('auth');
+  const logout = async () => {
+    try {
+      // バックエンドのセッションをクリア
+      await fetch('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include'
+      });
+      
+      // ローカルの認証状態をクリア
+      localStorage.removeItem('auth');
+      setIsAuthenticated(false);
+      setAuthCode(null);
+      setTokenInfo(null);
+      
+      // Auth0のログアウトURLを取得してリダイレクト
+      const response = await fetch('/api/auth/logout-url');
+      const data = await response.json();
+      
+      if (data.logoutUrl) {
+        window.location.href = data.logoutUrl;
+      }
+    } catch (error) {
+      console.error('ログアウトエラー:', error);
+    }
   };
 
   return (
