@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import LoginButton from './LoginButton';
 
 const TopBar: React.FC = () => {
-  const { isAuthenticated, logout, tokenInfo } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   return (
     <div className="top-bar">

@@ -2,7 +2,6 @@ package com.example.controller
 
 import com.example.dto.UserDto
 import com.example.service.UserService
-import com.example.dto.UserSession
 import com.example.service.SessionService
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.ResponseEntity
@@ -23,30 +22,15 @@ class UserController(
      */
     @GetMapping("/session")
     fun checkSession(request: HttpServletRequest): ResponseEntity<Map<String, Boolean>> {
-        val isAuthenticated = request.session?.getAttribute("authenticated") == true
+        val isAuthenticated = sessionService.isLoggedIn(request)
         return ResponseEntity.ok(mapOf("authenticated" to isAuthenticated))
     }
-    
-    /**
-     * ログアウト処理
-     */
-    @PostMapping("/logout")
-    fun logout(request: HttpServletRequest): ResponseEntity<Void> {
-        sessionService.invalidateSession(request)
-        return ResponseEntity.ok().build()
-    }
 
+    /**
+     * 現在のユーザー情報を取得する
+     */
     @GetMapping("/me")
     fun getCurrentUser(request: HttpServletRequest): ResponseEntity<Any> {
-        // テスト用ダミーユーザーを引き続き返す
-        // val dummyUser = mapOf(
-        //     "id" to "auth0|12345",
-        //     "name" to "テストユーザー",
-        //     "email" to "test@example.com",
-        //     "picture" to "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"
-        // )
-        // return ResponseEntity.ok(dummyUser)
-        
         return try {
             val user = userService.getCurrentUser(request)
             ResponseEntity.ok(user)
