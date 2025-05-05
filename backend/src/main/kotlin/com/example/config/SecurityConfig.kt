@@ -20,6 +20,7 @@ class SecurityConfig {
                     .requestMatchers("/api/auth/logout").permitAll()
                     .requestMatchers("/api/auth/logout-url").permitAll()
                     .requestMatchers("/api/user/session").permitAll()
+                    .requestMatchers("/api/user/me").permitAll()
                     .requestMatchers("/api/hello").permitAll()
                     .anyRequest().authenticated()
             }

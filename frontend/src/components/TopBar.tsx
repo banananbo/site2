@@ -15,12 +15,8 @@ const TopBar: React.FC = () => {
         <div className="top-bar-right">
           {isAuthenticated ? (
             <div className="user-menu">
-              <span className="user-name">
-                {tokenInfo?.name || 'ユーザー'}
-              </span>
-              <button onClick={logout} className="logout-button">
-                ログアウト
-              </button>
+              <Link to="/profile" className="profile-link">プロフィール</Link>
+              <button className="logout-button" onClick={logout}>ログアウト</button>
             </div>
           ) : (
             <LoginButton />

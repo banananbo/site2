@@ -1,10 +1,13 @@
 package com.example.service
 
+import com.auth0.jwt.JWT
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.example.dto.UserDto
 import com.example.entity.AccessToken
 import com.example.entity.User
 import com.example.repository.AccessTokenRepository
 import com.example.repository.UserRepository
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -13,7 +16,8 @@ import java.time.ZoneId
 @Service
 class UserService(
     private val userRepository: UserRepository,
-    private val accessTokenRepository: AccessTokenRepository
+    private val accessTokenRepository: AccessTokenRepository,
+    private val sessionService: SessionService
 ) {
 
     /**
@@ -63,5 +67,36 @@ class UserService(
      */
     fun getLatestAccessToken(user: User): AccessToken? {
         return accessTokenRepository.findFirstByUserOrderByCreatedAtDesc(user).orElse(null)
+    }
+
+    fun getCurrentUser(request: HttpServletRequest): UserDto {
+        // セッションからユーザー情報を取得
+        val session = sessionService.getCurrentUser(request)
+            ?: throw Exception("ユーザーが認証されていません")
+        
+        // セッションからIDトークンが取得できない場合は、Auth0IDをそのまま使用
+        if (session.idToken.isBlank()) {
+            // IDトークンが無い場合は、Auth0IDと他の情報からユーザーDTOを生成
+            return UserDto(
+                id = session.auth0Id,
+                name = session.name ?: "Guest",
+                email = session.email,
+                picture = null
+            )
+        }
+        
+        // IDトークンが存在する場合はJWTをデコード
+        val decodedToken = decodeIdToken(session.idToken)
+        
+        return UserDto(
+            id = decodedToken.claims["sub"]?.asString() ?: session.auth0Id,
+            name = decodedToken.claims["name"]?.asString() ?: session.name ?: "Guest",
+            email = decodedToken.claims["email"]?.asString() ?: session.email,
+            picture = decodedToken.claims["picture"]?.asString()
+        )
+    }
+    
+    private fun decodeIdToken(idToken: String): DecodedJWT {
+        return JWT.decode(idToken)
     }
 } 

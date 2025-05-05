@@ -47,8 +47,8 @@ class TokenService(
         // アクセストークンを保存
         userService.saveAccessToken(user, response.accessToken, response.expiresIn)
         
-        // セッションを作成（ログイン状態にする）
-        sessionService.createUserSession(request, user)
+        // セッションを作成（ログイン状態にする）- IDトークンも保存
+        sessionService.createUserSession(request, user, response.idToken)
         
         return response
     }

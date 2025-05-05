@@ -15,13 +15,14 @@ class SessionService {
     /**
      * ユーザーセッションを作成する
      */
-    fun createUserSession(request: HttpServletRequest, user: User) {
+    fun createUserSession(request: HttpServletRequest, user: User, idToken: String? = null) {
         val session = request.session
         val userSession = UserSession(
             userId = user.id ?: throw IllegalStateException("ユーザーIDがありません"),
             auth0Id = user.auth0Id,
             email = user.email,
-            name = user.name
+            name = user.name,
+            idToken = idToken ?: ""
         )
         session.setAttribute(USER_SESSION_KEY, userSession)
     }
