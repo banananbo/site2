@@ -1,20 +1,6 @@
 CREATE DATABASE IF NOT EXISTS appdb;
 USE appdb;
-
-CREATE TABLE IF NOT EXISTS messages (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    content VARCHAR(255) NOT NULL
-);
-
-INSERT INTO messages (content) VALUES ('Hello MySQL'); 
-
-CREATE TABLE IF NOT EXISTS english_words (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    word VARCHAR(100) NOT NULL,
-    meaning TEXT,
-    example TEXT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    translation_status ENUM('PENDING', 'COMPLETED', 'ERROR') DEFAULT 'PENDING',
-    UNIQUE KEY (word)
-); 
+-- 初期ユーザーの作成（必要に応じて）
+CREATE USER IF NOT EXISTS 'appuser'@'%' IDENTIFIED BY 'apppassword';
+GRANT ALL PRIVILEGES ON appdb.* TO 'appuser'@'%';
+FLUSH PRIVILEGES;

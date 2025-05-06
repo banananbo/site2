@@ -1,3 +1,15 @@
+-- english_wordsテーブル
+CREATE TABLE IF NOT EXISTS english_words (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    word VARCHAR(100) NOT NULL,
+    meaning TEXT,
+    example TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    translation_status ENUM('PENDING', 'COMPLETED', 'ERROR') DEFAULT 'PENDING',
+    UNIQUE KEY (word)
+);
+
 -- センテンステーブル
 CREATE TABLE sentences (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -58,4 +70,11 @@ CREATE TABLE sentence_grammar_relations (
     FOREIGN KEY (sentence_id) REFERENCES sentences(id) ON DELETE CASCADE,
     FOREIGN KEY (grammar_id) REFERENCES grammars(id) ON DELETE CASCADE,
     UNIQUE (sentence_id, grammar_id)
+);
+
+-- messagesテーブル
+CREATE TABLE IF NOT EXISTS messages (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    content TEXT NOT NULL,
+    user_id BIGINT NOT NULL DEFAULT 1
 ); 
