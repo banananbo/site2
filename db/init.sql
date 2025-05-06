@@ -7,3 +7,14 @@ CREATE TABLE IF NOT EXISTS messages (
 );
 
 INSERT INTO messages (content) VALUES ('Hello MySQL'); 
+
+CREATE TABLE IF NOT EXISTS english_words (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    word VARCHAR(100) NOT NULL,
+    meaning TEXT,
+    example TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    translation_status ENUM('PENDING', 'COMPLETED', 'ERROR') DEFAULT 'PENDING',
+    UNIQUE KEY (word)
+); 

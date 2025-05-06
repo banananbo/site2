@@ -28,6 +28,12 @@ class SecurityConfig {
                     // その他のパブリックAPI
                     .requestMatchers("/api/hello").permitAll()
                     
+                    // 英単語API
+                    .requestMatchers("/api/words/**").permitAll()
+                    
+                    // APIログAPI
+                    .requestMatchers("/api/logs/**").permitAll()
+                    
                     // その他のリクエストは認証必須
                     .anyRequest().authenticated()
             }

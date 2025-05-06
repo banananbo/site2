@@ -30,6 +30,19 @@ dependencies {
     // Spring Sessionでセッション管理
     implementation("org.springframework.session:spring-session-jdbc")
     
+    // Redis関連
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    
+    // 非同期処理 Spring Batch
+    implementation("org.springframework.boot:spring-boot-starter-batch")
+    
+    // OpenAI API
+    implementation("com.theokanning.openai-gpt3-java:service:0.18.2")
+    
+    // JSON処理用
+    implementation("com.google.code.gson:gson:2.10.1")
+
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
