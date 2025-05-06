@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import jakarta.persistence.EntityManager
 import org.slf4j.LoggerFactory
+import org.springframework.scheduling.annotation.Async
 
 @Service
 class SentenceService(
@@ -30,6 +31,7 @@ class SentenceService(
 
     /**
      * センテンスを登録し、要素を抽出して関連付ける
+     * 処理を即時返し、翻訳と要素抽出は非同期で行う
      */
     @Transactional
     fun registerSentence(
@@ -46,34 +48,70 @@ class SentenceService(
             DifficultyLevel.INTERMEDIATE
         }
         
-        // 自動翻訳の実行（翻訳が指定されていない場合のみ）
-        val finalTranslation = if (translation.isNullOrBlank()) {
-            try {
-                openaiService.translateToJapanese(text)
-            } catch (e: Exception) {
-                logger.error("自動翻訳に失敗しました: $text", e)
-                null
-            }
-        } else {
-            translation
-        }
-        
-        // センテンスを作成して保存
+        // センテンスを作成して保存（PENDINGステータスで）
         val sentence = Sentence(
             text = text,
-            translation = finalTranslation,
+            translation = translation,
             note = note,
             source = source,
             difficulty = difficultyLevel,
-            translationStatus = if (finalTranslation != null) TranslationStatus.COMPLETED else TranslationStatus.PENDING
+            translationStatus = if (translation != null) TranslationStatus.COMPLETED else TranslationStatus.PENDING
         )
         
         val savedSentence = sentenceRepository.save(sentence)
         
-        // 非同期で要素抽出処理を開始（実際の実装ではCompletableFutureやSpring Batchなどを使用）
-        extractAndLinkElements(savedSentence.id!!, text)
+        // 非同期で翻訳と要素抽出処理を開始
+        processTranslationAndExtraction(savedSentence.id!!, text)
         
         return SentenceDto.fromEntity(savedSentence)
+    }
+    
+    /**
+     * 非同期で翻訳と要素抽出処理を行う
+     */
+    @Async("taskExecutor")
+    @Transactional
+    fun processTranslationAndExtraction(sentenceId: Long, text: String) {
+        logger.info("センテンス処理を開始: ID={}", sentenceId)
+        try {
+            val sentence = sentenceRepository.findById(sentenceId).orElse(null) ?: run {
+                logger.error("センテンスが見つかりません: ID={}", sentenceId)
+                return
+            }
+            
+            // 処理中に更新
+            sentence.translationStatus = TranslationStatus.PROCESSING
+            sentenceRepository.save(sentence)
+            
+            // 自動翻訳が未実行の場合は実行
+            if (sentence.translation == null) {
+                try {
+                    val translation = openaiService.translateToJapanese(text)
+                    if (translation != null) {
+                        sentence.translation = translation
+                        sentenceRepository.save(sentence)
+                    }
+                } catch (e: Exception) {
+                    logger.error("自動翻訳に失敗しました: {}", text, e)
+                }
+            }
+            
+            // 要素抽出を行う
+            extractAndLinkElements(sentenceId, text)
+            
+            logger.info("センテンス処理を完了: ID={}", sentenceId)
+        } catch (e: Exception) {
+            logger.error("センテンス処理中にエラーが発生しました: ID={}", sentenceId, e)
+            try {
+                val sentence = sentenceRepository.findById(sentenceId).orElse(null)
+                if (sentence != null) {
+                    sentence.translationStatus = TranslationStatus.ERROR
+                    sentenceRepository.save(sentence)
+                }
+            } catch (ex: Exception) {
+                logger.error("エラー状態の更新に失敗しました: ID={}", sentenceId, ex)
+            }
+        }
     }
     
     /**
@@ -84,21 +122,8 @@ class SentenceService(
         val sentence = sentenceRepository.findById(sentenceId).orElse(null) ?: return
         
         try {
-            // 処理中に更新
-            sentence.translationStatus = TranslationStatus.PROCESSING
-            sentenceRepository.save(sentence)
-            
             // OpenAI APIを使用して要素を抽出
             val extractionResult = openaiService.extractElementsFromSentence(text)
-            
-            // 自動翻訳が未実行の場合は実行
-            if (sentence.translation == null) {
-                val translation = openaiService.translateToJapanese(text)
-                if (translation != null) {
-                    sentence.translation = translation
-                    sentenceRepository.save(sentence)
-                }
-            }
             
             // 抽出された単語を処理
             extractionResult.words.forEach { word ->
@@ -117,13 +142,12 @@ class SentenceService(
             }
             
             // 抽出されたイディオムを処理
-            extractionResult.idioms.forEach { idiomText ->
-                val idiom = idiomRepository.findByPhrase(idiomText) ?: run {
+            extractionResult.idioms.forEach { phraseText ->
+                val idiom = idiomRepository.findByPhrase(phraseText) ?: run {
                     val newIdiom = Idiom(
-                        phrase = idiomText,
-                        // AIを使用して意味と説明を取得できる
-                        meaning = openaiService.getIdiomMeaning(idiomText),
-                        explanation = openaiService.getIdiomExplanation(idiomText)
+                        phrase = phraseText,
+                        meaning = openaiService.getIdiomMeaning(phraseText),
+                        explanation = openaiService.getIdiomExplanation(phraseText)
                     )
                     idiomRepository.save(newIdiom)
                 }
@@ -263,8 +287,8 @@ class SentenceService(
         if (text != existingSentence.text && savedSentence.id != null) {
             // 関連を一度削除
             deleteAllRelations(savedSentence.id)
-            // 要素を再抽出して関連付け
-            extractAndLinkElements(savedSentence.id, text)
+            // 要素を再抽出して関連付け（非同期処理）
+            processTranslationAndExtraction(savedSentence.id, text)
         }
         
         return SentenceDto.fromEntity(savedSentence)

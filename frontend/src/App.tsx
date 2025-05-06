@@ -11,31 +11,155 @@ import WordForm from './components/WordForm';
 import WordList from './components/WordList';
 import UserWordList from './components/UserWordList';
 import WordDetail from './components/WordDetail';
+import SentenceForm from './components/SentenceForm';
+import SentenceList from './components/SentenceList';
 import { EnglishWord } from './types/EnglishWord';
 
 // 英単語学習ページのコンポーネント
 const EnglishStudyPage: React.FC = () => {
-  const [refreshList, setRefreshList] = useState(false);
+  const [refreshWordList, setRefreshWordList] = useState(false);
+  const [refreshSentenceList, setRefreshSentenceList] = useState(0);
+  const [activeTab, setActiveTab] = useState<'word' | 'sentence'>('word');
 
   const handleWordRegistered = (word: EnglishWord) => {
     // リストを更新するためにステートを切り替える
-    setRefreshList(!refreshList);
+    setRefreshWordList(!refreshWordList);
+  };
+
+  const handleSentenceAdded = () => {
+    // センテンスリストを更新
+    setRefreshSentenceList(prev => prev + 1);
+  };
+
+  const styles = {
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '20px',
+    },
+    header: {
+      marginBottom: '32px',
+      textAlign: 'center' as const,
+      color: '#333',
+      fontWeight: 600 as const,
+    },
+    tabContainer: {
+      display: 'flex' as const,
+      borderBottom: '1px solid #e0e0e0',
+      marginBottom: '24px',
+    },
+    tab: {
+      padding: '12px 24px',
+      cursor: 'pointer',
+      borderRadius: '4px 4px 0 0',
+      fontWeight: 500 as const,
+      fontSize: '16px',
+      transition: 'all 0.2s ease',
+      userSelect: 'none' as const,
+      marginRight: '8px',
+    },
+    activeTab: {
+      backgroundColor: '#ffffff',
+      borderTop: '2px solid #4a6cf7',
+      borderLeft: '1px solid #e0e0e0',
+      borderRight: '1px solid #e0e0e0',
+      borderBottom: '1px solid #ffffff',
+      marginBottom: '-1px',
+      color: '#4a6cf7',
+    },
+    inactiveTab: {
+      backgroundColor: '#f5f7fb',
+      color: '#667085',
+      border: '1px solid transparent',
+    },
+    formContainer: {
+      marginBottom: '32px',
+      backgroundColor: '#ffffff',
+      borderRadius: '8px',
+      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.05)',
+    },
+    sectionHeader: {
+      fontSize: '24px',
+      fontWeight: 600 as const,
+      color: '#333',
+      margin: '32px 0 16px 0',
+      borderBottom: '2px solid #f0f0f0',
+      paddingBottom: '8px',
+    },
+    listSection: {
+      marginTop: '24px',
+    },
   };
 
   return (
-    <div className="english-study-page">
-      <h1>英単語学習アプリ</h1>
-      <WordForm onWordRegistered={handleWordRegistered} />
-      <WordList key={refreshList.toString()} />
+    <div style={styles.container}>
+      <h1 style={styles.header}>英単語学習アプリ</h1>
+
+      {/* タブ切り替え */}
+      <div style={styles.tabContainer}>
+        <div 
+          style={{
+            ...styles.tab,
+            ...(activeTab === 'word' ? styles.activeTab : styles.inactiveTab)
+          }}
+          onClick={() => setActiveTab('word')}
+        >
+          単語登録
+        </div>
+        <div 
+          style={{
+            ...styles.tab,
+            ...(activeTab === 'sentence' ? styles.activeTab : styles.inactiveTab)
+          }}
+          onClick={() => setActiveTab('sentence')}
+        >
+          センテンス登録
+        </div>
+      </div>
+
+      {/* フォーム表示 */}
+      <div style={styles.formContainer}>
+        {activeTab === 'word' ? (
+          <WordForm onWordRegistered={handleWordRegistered} />
+        ) : (
+          <SentenceForm onSentenceAdded={handleSentenceAdded} />
+        )}
+      </div>
+
+      {/* 単語リスト */}
+      <h2 style={styles.sectionHeader}>単語リスト</h2>
+      <div style={styles.listSection}>
+        <WordList key={refreshWordList.toString()} />
+      </div>
+
+      {/* センテンスリスト */}
+      <h2 style={styles.sectionHeader}>センテンスリスト</h2>
+      <div style={styles.listSection}>
+        <SentenceList refresh={refreshSentenceList} />
+      </div>
     </div>
   );
 };
 
 // マイ単語リストページのコンポーネント
 const MyWordListPage: React.FC = () => {
+  const styles = {
+    container: {
+      maxWidth: '1200px',
+      margin: '0 auto',
+      padding: '20px',
+    },
+    header: {
+      marginBottom: '32px',
+      textAlign: 'center' as const,
+      color: '#333',
+      fontWeight: 600 as const,
+    }
+  };
+
   return (
-    <div className="english-study-page">
-      <h1>英単語学習アプリ</h1>
+    <div style={styles.container}>
+      <h1 style={styles.header}>マイ単語リスト</h1>
       <UserWordList />
     </div>
   );

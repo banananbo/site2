@@ -6,12 +6,126 @@ interface SentenceFormProps {
   onSentenceAdded?: () => void;
 }
 
+const styles = {
+  container: {
+    border: '1px solid #dee2e6',
+    borderRadius: '6px',
+    marginBottom: '24px',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+  },
+  header: {
+    borderBottom: '1px solid #dee2e6',
+    padding: '16px 20px',
+    backgroundColor: '#f8f9fa',
+    borderTopLeftRadius: '6px',
+    borderTopRightRadius: '6px',
+  },
+  title: {
+    margin: 0,
+    fontSize: '18px',
+    fontWeight: 600 as const,
+    color: '#212529',
+  },
+  body: {
+    padding: '20px',
+  },
+  success: {
+    backgroundColor: '#d4edda',
+    color: '#155724',
+    padding: '12px 16px',
+    borderRadius: '4px',
+    marginBottom: '16px',
+    border: '1px solid #c3e6cb',
+  },
+  error: {
+    backgroundColor: '#f8d7da',
+    color: '#721c24',
+    padding: '12px 16px',
+    borderRadius: '4px',
+    marginBottom: '16px',
+    border: '1px solid #f5c6cb',
+  },
+  formGroup: {
+    marginBottom: '20px',
+  },
+  label: {
+    display: 'block',
+    marginBottom: '8px',
+    fontWeight: 500 as const,
+    color: '#212529',
+  },
+  textArea: {
+    display: 'block',
+    width: '100%',
+    padding: '10px 12px',
+    fontSize: '16px',
+    lineHeight: 1.5,
+    color: '#495057',
+    backgroundColor: '#fff',
+    backgroundClip: 'padding-box',
+    border: '1px solid #ced4da',
+    borderRadius: '4px',
+    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+    fontFamily: 'inherit',
+  },
+  input: {
+    display: 'block',
+    width: '100%',
+    padding: '10px 12px',
+    fontSize: '16px',
+    lineHeight: 1.5,
+    color: '#495057',
+    backgroundColor: '#fff',
+    backgroundClip: 'padding-box',
+    border: '1px solid #ced4da',
+    borderRadius: '4px',
+    transition: 'border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+  },
+  focusedInput: {
+    borderColor: '#80bdff',
+    outline: 0,
+    boxShadow: '0 0 0 0.2rem rgba(0, 123, 255, 0.25)',
+  },
+  hint: {
+    display: 'block',
+    marginTop: '5px',
+    fontSize: '14px',
+    color: '#6c757d',
+  },
+  button: {
+    color: '#fff',
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+    padding: '10px 16px',
+    fontSize: '16px',
+    lineHeight: 1.5,
+    borderRadius: '4px',
+    cursor: 'pointer',
+    border: '1px solid transparent',
+    userSelect: 'none' as const,
+    transition: 'color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out',
+  },
+  buttonHover: {
+    backgroundColor: '#0069d9',
+    borderColor: '#0062cc',
+  },
+  buttonDisabled: {
+    backgroundColor: '#007bff',
+    borderColor: '#007bff',
+    opacity: 0.65,
+    cursor: 'not-allowed' as const,
+  },
+};
+
 const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
   const [text, setText] = useState('');
   const [source, setSource] = useState<string | null>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [isButtonHovered, setIsButtonHovered] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,7 +150,7 @@ const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
       // フォームをリセット
       setText('');
       setSource('');
-      setSuccess('センテンスを登録しました。翻訳や要素の抽出、難易度の判定は自動的に行われます。');
+      setSuccess('センテンスを登録しました。翻訳や要素の抽出、難易度の判定はバックグラウンドで自動的に行われます。リストで処理状況を確認できます。');
       
       // 親コンポーネントに通知
       if (onSentenceAdded) {
@@ -51,50 +165,66 @@ const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
   };
 
   return (
-    <div className="card mb-4">
-      <div className="card-header">
-        <h5 className="mb-0">新しいセンテンスを登録</h5>
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h5 style={styles.title}>新しいセンテンスを登録</h5>
       </div>
-      <div className="card-body">
+      <div style={styles.body}>
         {error && (
-          <div className="alert alert-danger">{error}</div>
+          <div style={styles.error}>{error}</div>
         )}
         
         {success && (
-          <div className="alert alert-success">{success}</div>
+          <div style={styles.success}>{success}</div>
         )}
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="text" className="form-label">テキスト</label>
+          <div style={styles.formGroup}>
+            <label htmlFor="text" style={styles.label}>テキスト</label>
             <textarea
               id="text"
-              className="form-control"
+              style={{
+                ...styles.textArea,
+                ...(isTextAreaFocused ? styles.focusedInput : {})
+              }}
               value={text}
               onChange={(e) => setText(e.target.value)}
+              onFocus={() => setIsTextAreaFocused(true)}
+              onBlur={() => setIsTextAreaFocused(false)}
               placeholder="登録したい英文を入力してください"
               required
               rows={4}
             />
-            <small className="text-muted">※翻訳や単語・イディオム・文法の抽出、難易度の判定は自動的に行われます</small>
+            <small style={styles.hint}>※翻訳や単語・イディオム・文法の抽出、難易度の判定は自動的に行われます</small>
           </div>
           
-          <div className="mb-3">
-            <label htmlFor="source" className="form-label">出典（任意）</label>
+          <div style={styles.formGroup}>
+            <label htmlFor="source" style={styles.label}>出典（任意）</label>
             <input
               type="text"
               id="source"
-              className="form-control"
+              style={{
+                ...styles.input,
+                ...(isInputFocused ? styles.focusedInput : {})
+              }}
               value={source || ''}
               onChange={(e) => setSource(e.target.value)}
+              onFocus={() => setIsInputFocused(true)}
+              onBlur={() => setIsInputFocused(false)}
               placeholder="書籍名、ウェブサイト、映画など"
             />
           </div>
           
           <button
             type="submit"
-            className="btn btn-primary"
+            style={{
+              ...styles.button,
+              ...(isSubmitting ? styles.buttonDisabled : {}),
+              ...(isButtonHovered && !isSubmitting ? styles.buttonHover : {})
+            }}
             disabled={isSubmitting}
+            onMouseEnter={() => setIsButtonHovered(true)}
+            onMouseLeave={() => setIsButtonHovered(false)}
           >
             {isSubmitting ? '登録中...' : '登録する'}
           </button>
