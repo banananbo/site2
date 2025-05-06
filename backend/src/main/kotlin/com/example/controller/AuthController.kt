@@ -2,8 +2,10 @@ package com.example.controller
 
 import com.example.config.Auth0Config
 import com.example.dto.AuthUrlResponse
+import com.example.service.DbSessionService
 import com.example.service.SessionService
 import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
 import org.springframework.core.env.Environment
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController
 class AuthController(
     private val auth0Config: Auth0Config,
     private val sessionService: SessionService,
+    private val dbSessionService: DbSessionService,
     private val env: Environment
 ) {
 
@@ -29,9 +32,14 @@ class AuthController(
      * セッションを無効化し、ユーザーを未認証状態にする
      */
     @PostMapping("/logout")
-    fun logout(request: HttpServletRequest): ResponseEntity<Any> {
-        val session = request.getSession(false)
-        session?.invalidate()
+    fun logout(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Any> {
+        // 従来のセッションを無効化
+        val oldSession = request.getSession(false)
+        oldSession?.invalidate()
+        
+        // DB保存のセッションも無効化
+        dbSessionService.invalidateSession(request, response)
+        
         return ResponseEntity.ok().build()
     }
 
