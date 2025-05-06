@@ -46,7 +46,8 @@ class TranslationService(
                     {"example": "英語の例文3", "translation": "日本語訳3"}
                   ]
                 }
-                
+                英語教師として、存在しない英単語に適当な意味をつけるのはやめてください
+                存在しない英単語は、meaningのみを空文字で返してください
                 JSONフォーマット以外の文章は含めないでください。
             """.trimIndent()
             
@@ -81,18 +82,36 @@ class TranslationService(
                 try {
                     val response = openAiService.createCompletion(request)
                     latestResponse = gson.toJson(response)
-                    
+
+                    // レスポンスを解析
                     if (response.choices.isNotEmpty()) {
                         val content = response.choices[0].text
                         
                         // JSON形式の応答から意味と例文を抽出
-                        val meaningRegex = "\"meaning\":\\s*\"([^\"]+)\"".toRegex()
+                        val meaningRegex = "\"meaning\":\\s*\"([^\"]*)\"".toRegex()
                         val examplesRegex = "\"examples\":\\s*\\[(.*?)\\]".toRegex(RegexOption.DOT_MATCHES_ALL)
                         
                         val meaningMatch = meaningRegex.find(content)
                         val examplesMatch = examplesRegex.find(content)
                         
-                        word.meaning = meaningMatch?.groupValues?.get(1)
+                        val meaningValue = meaningMatch?.groupValues?.get(1) ?: ""
+                        word.meaning = meaningValue
+                        
+                        // 存在しない英単語の場合（meaningが空）、レコードを削除して処理を終了
+                        if (meaningValue.isBlank() && word.id != null) {
+                            log.info("存在しない英単語のため削除します: {}", word.word)
+                            englishWordRepository.deleteById(word.id)
+                            
+                            // APIログを更新
+                            apiLogService.updateWithResponse(
+                                apiLog = apiLog,
+                                responseBody = latestResponse,
+                                successful = true,
+                                errorMessage = "存在しない英単語のため削除されました"
+                            )
+                            
+                            return true
+                        }
                         
                         // 既存の例文を削除して新しい例文を追加
                         if (word.id != null) {
