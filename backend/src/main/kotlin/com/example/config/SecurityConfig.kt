@@ -31,6 +31,9 @@ class SecurityConfig {
                     // 英単語API
                     .requestMatchers("/api/words/**").permitAll()
                     
+                    // センテンスAPI
+                    .requestMatchers("/api/sentences/**").permitAll()
+                    
                     // APIログAPI
                     .requestMatchers("/api/logs/**").permitAll()
                     

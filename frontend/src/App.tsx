@@ -4,6 +4,7 @@ import './App.css';
 import HomePage from './pages/HomePage';
 import CallbackPage from './pages/CallbackPage';
 import ProfilePage from './pages/ProfilePage';
+import SentencePage from './pages/SentencePage';
 import { AuthProvider } from './context/AuthContext';
 import TopBar from './components/TopBar';
 import WordForm from './components/WordForm';
@@ -41,6 +42,7 @@ const App: React.FC = () => {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/english-study" element={<EnglishStudyPage />} />
             <Route path="/english-study/words/:wordId" element={<WordDetail />} />
+            <Route path="/sentences" element={<SentencePage />} />
           </Routes>
         </main>
       </Router>

@@ -1,5 +1,6 @@
 package com.example.entity
 
+import com.example.common.TranslationStatus
 import java.time.LocalDateTime
 import jakarta.persistence.*
 
@@ -29,12 +30,8 @@ data class EnglishWord(
     @ManyToMany
     @JoinTable(
         name = "word_example_relations",
-        joinColumns = [JoinColumn(name = "wordId")],
-        inverseJoinColumns = [JoinColumn(name = "exampleId")]
+        joinColumns = [JoinColumn(name = "word_id")],
+        inverseJoinColumns = [JoinColumn(name = "example_id")]
     )
     val examples: List<WordExample> = emptyList()
-)
-
-enum class TranslationStatus {
-    PENDING, COMPLETED, ERROR
-} 
+) 

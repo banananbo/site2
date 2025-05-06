@@ -9,9 +9,9 @@ class WordExampleRelation(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     
-    @Column(nullable = false)
+    @Column(name = "word_id", nullable = false)
     val wordId: Long,
     
-    @Column(nullable = false)
+    @Column(name = "example_id", nullable = false)
     val exampleId: Long
 ) 

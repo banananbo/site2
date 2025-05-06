@@ -1,6 +1,7 @@
 package com.example.job
 
-import com.example.entity.TranslationStatus
+import com.example.entity.EnglishWord
+import com.example.common.TranslationStatus
 import com.example.repository.EnglishWordRepository
 import com.example.service.TranslationService
 import org.slf4j.LoggerFactory

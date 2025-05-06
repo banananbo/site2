@@ -1,8 +1,8 @@
 package com.example.service
 
+import com.example.common.TranslationStatus
 import com.example.dto.EnglishWordDto
 import com.example.entity.EnglishWord
-import com.example.entity.TranslationStatus
 import com.example.repository.EnglishWordRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

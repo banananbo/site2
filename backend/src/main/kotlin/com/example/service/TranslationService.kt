@@ -2,7 +2,7 @@ package com.example.service
 
 import com.example.entity.ApiLog
 import com.example.entity.EnglishWord
-import com.example.entity.TranslationStatus
+import com.example.common.TranslationStatus
 import com.example.repository.EnglishWordRepository
 import com.theokanning.openai.completion.CompletionRequest
 import com.theokanning.openai.service.OpenAiService

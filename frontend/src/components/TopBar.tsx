@@ -14,6 +14,7 @@ const TopBar: React.FC = () => {
         </div>
         <div className="top-bar-menu">
           <Link to="/english-study" className="menu-link">英単語学習</Link>
+          <Link to="/sentences" className="menu-link">センテンス</Link>
         </div>
         <div className="top-bar-right">
           {isAuthenticated ? (
