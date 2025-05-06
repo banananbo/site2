@@ -96,7 +96,7 @@ class TranslationService(
                         
                         // 既存の例文を削除して新しい例文を追加
                         if (word.id != null) {
-                            wordExampleService.deleteAllExamples(word.id)
+                            wordExampleService.removeAllExamplesFromWord(word.id)
                         }
                         
                         // 例文を抽出して保存
@@ -109,8 +109,8 @@ class TranslationService(
                                 val exampleText = match.groupValues[1]
                                 val translationText = match.groupValues[2]
                                 
-                                wordExampleService.addExample(
-                                    englishWordId = word.id,
+                                wordExampleService.addExampleToWord(
+                                    wordId = word.id,
                                     example = exampleText,
                                     translation = translationText,
                                     source = "OpenAI"

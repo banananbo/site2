@@ -26,8 +26,12 @@ data class EnglishWord(
     @Column(name = "translation_status")
     var translationStatus: TranslationStatus = TranslationStatus.PENDING,
     
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "englishWordId")
+    @ManyToMany
+    @JoinTable(
+        name = "word_example_relations",
+        joinColumns = [JoinColumn(name = "wordId")],
+        inverseJoinColumns = [JoinColumn(name = "exampleId")]
+    )
     val examples: List<WordExample> = emptyList()
 )
 

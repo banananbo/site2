@@ -6,7 +6,6 @@ data class WordExampleDto(
     val id: Long? = null,
     val example: String,
     val translation: String? = null,
-    val englishWordId: Long,
     val note: String? = null,
     val source: String? = null
 ) {
@@ -16,7 +15,6 @@ data class WordExampleDto(
                 id = entity.id,
                 example = entity.example,
                 translation = entity.translation,
-                englishWordId = entity.englishWordId,
                 note = entity.note,
                 source = entity.source
             )
@@ -28,7 +26,6 @@ data class WordExampleDto(
             id = this.id,
             example = this.example,
             translation = this.translation,
-            englishWordId = this.englishWordId,
             note = this.note,
             source = this.source
         )

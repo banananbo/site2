@@ -13,7 +13,7 @@ class WordExampleController(private val wordExampleService: WordExampleService) 
 
     @GetMapping
     fun getExamples(@PathVariable wordId: Long): ResponseEntity<List<WordExampleResponse>> {
-        val examples = wordExampleService.getExamples(wordId)
+        val examples = wordExampleService.getExamplesByWordId(wordId)
         
         val response = examples.map {
             WordExampleResponse(
@@ -33,8 +33,8 @@ class WordExampleController(private val wordExampleService: WordExampleService) 
         @PathVariable wordId: Long,
         @RequestBody request: WordExampleRequest
     ): ResponseEntity<WordExampleResponse> {
-        val addedExample = wordExampleService.addExample(
-            englishWordId = wordId,
+        val addedExample = wordExampleService.addExampleToWord(
+            wordId = wordId,
             example = request.example,
             translation = request.translation,
             note = request.note,
@@ -80,9 +80,16 @@ class WordExampleController(private val wordExampleService: WordExampleService) 
     @DeleteMapping("/{exampleId}")
     fun deleteExample(
         @PathVariable wordId: Long,
-        @PathVariable exampleId: Long
+        @PathVariable exampleId: Long,
+        @RequestParam(required = false, defaultValue = "false") removeOnly: Boolean
     ): ResponseEntity<Void> {
-        val deleted = wordExampleService.deleteExample(exampleId)
+        val deleted = if (removeOnly) {
+            // 単語からのみ関連付けを削除
+            wordExampleService.removeExampleFromWord(wordId, exampleId)
+        } else {
+            // 例文自体を削除
+            wordExampleService.deleteExample(exampleId)
+        }
         
         return if (deleted) {
             ResponseEntity.noContent().build()

@@ -15,9 +15,6 @@ class WordExample(
     @Column
     val translation: String? = null,
     
-    @Column(nullable = false)
-    val englishWordId: Long,
-    
     @Column
     val note: String? = null,
     

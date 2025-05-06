@@ -22,7 +22,7 @@ class EnglishWordController(
         val registeredWord = englishWordService.registerWord(request.word)
         
         val examples = if (registeredWord.id != null) {
-            wordExampleService.getExamples(registeredWord.id)
+            wordExampleService.getExamplesByWordId(registeredWord.id)
                 .map { 
                     WordExampleResponse(
                         id = it.id!!,
@@ -52,7 +52,7 @@ class EnglishWordController(
         
         val response = words.map {
             val examples = if (it.id != null) {
-                wordExampleService.getExamples(it.id)
+                wordExampleService.getExamplesByWordId(it.id)
                     .map { example -> 
                         WordExampleResponse(
                             id = example.id!!,
@@ -81,7 +81,7 @@ class EnglishWordController(
     fun getWordById(@PathVariable id: Long): ResponseEntity<EnglishWordResponse> {
         val word = englishWordService.getWordById(id) ?: return ResponseEntity.notFound().build()
         
-        val examples = wordExampleService.getExamples(id)
+        val examples = wordExampleService.getExamplesByWordId(id)
             .map { 
                 WordExampleResponse(
                     id = it.id!!,
@@ -106,7 +106,7 @@ class EnglishWordController(
     fun findWordByText(@RequestParam word: String): ResponseEntity<EnglishWordResponse> {
         val foundWord = englishWordService.getWordByText(word) ?: return ResponseEntity.notFound().build()
         
-        val examples = foundWord.id?.let { wordExampleService.getExamples(it) }
+        val examples = foundWord.id?.let { wordExampleService.getExamplesByWordId(it) }
             ?.map { 
                 WordExampleResponse(
                     id = it.id!!,
@@ -130,7 +130,7 @@ class EnglishWordController(
     @DeleteMapping("/{id}")
     fun deleteWord(@PathVariable id: Long): ResponseEntity<Void> {
         // 単語を削除する前に、関連する例文も削除
-        wordExampleService.deleteAllExamples(id)
+        wordExampleService.removeAllExamplesFromWord(id)
         
         val deleted = englishWordService.deleteWord(id)
         
