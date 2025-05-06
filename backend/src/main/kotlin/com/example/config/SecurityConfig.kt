@@ -32,6 +32,9 @@ class SecurityConfig {
                     // ユーザー単語関連エンドポイント
                     .requestMatchers("/api/user/words/**").permitAll() // 一時的に全許可
                     
+                    // ユーザーセンテンス関連エンドポイント
+                    .requestMatchers("/api/user/sentences/**").permitAll() // 一時的に全許可
+                    
                     // その他のパブリックAPI
                     .requestMatchers("/api/hello").permitAll()
                     

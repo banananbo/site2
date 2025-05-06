@@ -26,7 +26,10 @@ const TopBar: React.FC = () => {
               <div className="dropdown-menu">
                 <Link to="/english-study" className="dropdown-item" onClick={toggleEnglishMenu}>全単語リスト</Link>
                 {isAuthenticated && (
-                  <Link to="/english-study/my-words" className="dropdown-item" onClick={toggleEnglishMenu}>マイ単語リスト</Link>
+                  <>
+                    <Link to="/english-study/my-words" className="dropdown-item" onClick={toggleEnglishMenu}>マイ単語リスト</Link>
+                    <Link to="/english-study/my-sentences" className="dropdown-item" onClick={toggleEnglishMenu}>マイセンテンスリスト</Link>
+                  </>
                 )}
               </div>
             )}

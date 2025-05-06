@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sentence, TranslationStatus } from '../types/Sentence';
 import { sentenceService } from '../services/sentenceService';
+import { userSentenceService } from '../services/userSentenceService';
 
 interface SentenceListProps {
   refresh: number;
@@ -202,6 +203,8 @@ const SentenceList: React.FC<SentenceListProps> = ({ refresh }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedSentence, setExpandedSentence] = useState<number | null>(null);
+  const [userSentenceIds, setUserSentenceIds] = useState<number[]>([]);
+  const [savingStates, setSavingStates] = useState<{[key: number]: boolean}>({});
 
   // センテンス一覧を取得
   useEffect(() => {
@@ -242,6 +245,21 @@ const SentenceList: React.FC<SentenceListProps> = ({ refresh }) => {
     return () => clearInterval(intervalId);
   }, [sentences]);
 
+  // ユーザーのセンテンスリストを取得
+  useEffect(() => {
+    const fetchUserSentences = async () => {
+      try {
+        const userSentencesList = await userSentenceService.getUserSentences();
+        const sentenceIds = userSentencesList.map(sentence => sentence.id);
+        setUserSentenceIds(sentenceIds);
+      } catch (err) {
+        console.error('マイセンテンスの取得に失敗しました', err);
+      }
+    };
+
+    fetchUserSentences();
+  }, [refresh]);
+
   // センテンスの削除
   const handleDelete = async (id: number) => {
     if (window.confirm('このセンテンスを削除してもよろしいですか？')) {
@@ -262,6 +280,66 @@ const SentenceList: React.FC<SentenceListProps> = ({ refresh }) => {
   const toggleDetails = (id: number) => {
     setExpandedSentence(expandedSentence === id ? null : id);
   };
+
+  // マイセンテンスに追加
+  const handleAddToMyList = async (id: number) => {
+    setSavingStates(prev => ({ ...prev, [id]: true }));
+    try {
+      const success = await userSentenceService.addSentenceToUserList(id);
+      if (success) {
+        setUserSentenceIds(prev => [...prev, id]);
+      } else {
+        setError('マイセンテンスへの追加に失敗しました');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'マイセンテンスへの追加中にエラーが発生しました');
+    } finally {
+      setSavingStates(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // マイセンテンスから削除
+  const handleRemoveFromMyList = async (id: number) => {
+    setSavingStates(prev => ({ ...prev, [id]: true }));
+    try {
+      const success = await userSentenceService.removeSentenceFromUserList(id);
+      if (success) {
+        setUserSentenceIds(prev => prev.filter(sentenceId => sentenceId !== id));
+      } else {
+        setError('マイセンテンスからの削除に失敗しました');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'マイセンテンスからの削除中にエラーが発生しました');
+    } finally {
+      setSavingStates(prev => ({ ...prev, [id]: false }));
+    }
+  };
+
+  // スタイルタグをヘッダーに追加
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      .sentence-spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 123, 255, 0.3);
+        border-top: 2px solid #007bff;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 8px;
+      }
+    `;
+    document.head.appendChild(styleElement);
+    
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   if (loading) return <div style={styles.loading}>読み込み中...</div>;
   if (error) return <div style={styles.error}>{error}</div>;
@@ -290,6 +368,9 @@ const SentenceList: React.FC<SentenceListProps> = ({ refresh }) => {
         } else if (sentence.translationStatus === TranslationStatus.PENDING) {
           cardStyle = {...styles.card, ...styles.pendingCard};
         }
+        
+        const isInMyList = userSentenceIds.includes(sentence.id);
+        const isSaving = savingStates[sentence.id] || false;
         
         return (
           <div key={sentence.id} style={cardStyle}>
@@ -339,6 +420,23 @@ const SentenceList: React.FC<SentenceListProps> = ({ refresh }) => {
                 >
                   {expandedSentence === sentence.id ? '詳細を隠す' : '詳細を表示'}
                 </button>
+                {isInMyList ? (
+                  <button
+                    style={{...styles.button, ...styles.buttonOutlineDanger}}
+                    onClick={() => handleRemoveFromMyList(sentence.id)}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? '処理中...' : 'マイセンテンスから削除'}
+                  </button>
+                ) : (
+                  <button
+                    style={{...styles.button, ...styles.buttonOutlinePrimary}}
+                    onClick={() => handleAddToMyList(sentence.id)}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? '処理中...' : 'マイセンテンスに追加'}
+                  </button>
+                )}
                 <button
                   style={{...styles.button, ...styles.buttonOutlineDanger}}
                   onClick={() => handleDelete(sentence.id)}
@@ -480,31 +578,5 @@ function getStatusLabel(status: string): string {
     default: return '不明';
   }
 }
-
-// スタイルタグをヘッダーに追加
-React.useEffect(() => {
-  const styleElement = document.createElement('style');
-  styleElement.innerHTML = `
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .sentence-spinner {
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(0, 123, 255, 0.3);
-      border-top: 2px solid #007bff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      margin-right: 8px;
-    }
-  `;
-  document.head.appendChild(styleElement);
-  
-  return () => {
-    document.head.removeChild(styleElement);
-  };
-}, []);
 
 export default SentenceList; 
