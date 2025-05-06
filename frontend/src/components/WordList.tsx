@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { wordService } from '../services/wordService';
+import { userWordService } from '../services/userWordService';
 import { EnglishWord, WordExample } from '../types/EnglishWord';
+import { useAuth } from '../context/AuthContext';
 
 const styles = {
   container: {
@@ -99,6 +101,47 @@ const styles = {
     ':hover': {
       textDecoration: 'underline'
     }
+  },
+  actionButtonsContainer: {
+    display: 'flex',
+    gap: '5px',
+    flexDirection: 'column' as const
+  },
+  addToListButton: {
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '3px',
+    padding: '4px 8px',
+    cursor: 'pointer',
+    fontSize: '0.8rem'
+  },
+  inListButton: {
+    backgroundColor: '#6c757d',
+    color: 'white',
+    border: 'none',
+    borderRadius: '3px',
+    padding: '4px 8px',
+    cursor: 'default',
+    fontSize: '0.8rem'
+  }
+};
+
+const navStyles = {
+  wordListNav: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem'
+  },
+  linkButton: {
+    display: 'inline-block',
+    backgroundColor: '#007bff',
+    color: 'white',
+    padding: '8px 16px',
+    borderRadius: '4px',
+    textDecoration: 'none',
+    fontSize: '0.9rem'
   }
 };
 
@@ -148,6 +191,9 @@ const WordList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [addToListLoading, setAddToListLoading] = useState<number | null>(null);
+  const [userWordIds, setUserWordIds] = useState<number[]>([]);
+  const { isAuthenticated } = useAuth();
   
   const fetchWords = async () => {
     setLoading(true);
@@ -156,6 +202,17 @@ const WordList: React.FC = () => {
     try {
       const fetchedWords = await wordService.getAllWords();
       setWords(fetchedWords);
+      
+      // ログイン中の場合、ユーザーの単語リストも取得
+      if (isAuthenticated) {
+        try {
+          const userWords = await userWordService.getUserWords();
+          const userWordIdArray = userWords.map(word => word.id);
+          setUserWordIds(userWordIdArray);
+        } catch (err) {
+          console.error('ユーザー単語リストの取得に失敗しました', err);
+        }
+      }
     } catch (err) {
       setError('単語リストの取得に失敗しました');
       console.error(err);
@@ -166,7 +223,7 @@ const WordList: React.FC = () => {
   
   useEffect(() => {
     fetchWords();
-  }, []);
+  }, [isAuthenticated]);
   
   const handleRefresh = () => {
     fetchWords();
@@ -195,6 +252,27 @@ const WordList: React.FC = () => {
     }
   };
 
+  const handleAddToList = async (id: number) => {
+    if (!isAuthenticated) return;
+    
+    setAddToListLoading(id);
+    
+    try {
+      const success = await userWordService.addWordToUserList(id);
+      if (success) {
+        // 成功時はユーザー単語IDリストに追加
+        setUserWordIds([...userWordIds, id]);
+      } else {
+        setError('単語をマイリストに追加できませんでした');
+      }
+    } catch (err) {
+      setError('単語をマイリストに追加できませんでした');
+      console.error(err);
+    } finally {
+      setAddToListLoading(null);
+    }
+  };
+
   if (loading) {
     return <p style={styles.loading}>読み込み中...</p>;
   }
@@ -214,7 +292,14 @@ const WordList: React.FC = () => {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.heading}>登録済み単語一覧</h2>
+      <div style={navStyles.wordListNav}>
+        <h2 style={styles.heading}>英単語リスト</h2>
+        {isAuthenticated && (
+          <Link to="/english-study/my-words" style={navStyles.linkButton}>
+            マイ単語リスト
+          </Link>
+        )}
+      </div>
       <button onClick={handleRefresh}>更新</button>
       
       <table style={styles.table}>
@@ -231,7 +316,7 @@ const WordList: React.FC = () => {
           {words.map((word) => (
             <tr key={word.id}>
               <td style={styles.td}>
-                <Link to={`/english-study/words/${word.id}`} style={styles.wordLink}>
+                <Link to={`/words/${word.id}`} style={styles.wordLink}>
                   {word.word}
                 </Link>
               </td>
@@ -247,13 +332,34 @@ const WordList: React.FC = () => {
                 </span>
               </td>
               <td style={styles.td}>
-                <button 
-                  onClick={() => handleDelete(word.id)}
-                  disabled={deleteLoading === word.id}
-                  style={styles.deleteButton}
-                >
-                  {deleteLoading === word.id ? '削除中...' : '削除'}
-                </button>
+                <div style={styles.actionButtonsContainer}>
+                  <button 
+                    onClick={() => handleDelete(word.id)}
+                    disabled={deleteLoading === word.id}
+                    style={styles.deleteButton}
+                  >
+                    {deleteLoading === word.id ? '削除中...' : '削除'}
+                  </button>
+                  
+                  {isAuthenticated && (
+                    userWordIds.includes(word.id) ? (
+                      <button 
+                        style={styles.inListButton}
+                        disabled={true}
+                      >
+                        マイリスト登録済み
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleAddToList(word.id)}
+                        disabled={addToListLoading === word.id}
+                        style={styles.addToListButton}
+                      >
+                        {addToListLoading === word.id ? '追加中...' : 'マイリストに追加'}
+                      </button>
+                    )
+                  )}
+                </div>
               </td>
             </tr>
           ))}

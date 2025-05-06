@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { wordService } from '../services/wordService';
+import { userWordService } from '../services/userWordService';
 import { EnglishWord } from '../types/EnglishWord';
+import { useAuth } from '../context/AuthContext';
 
 interface WordFormProps {
   onWordRegistered?: (word: EnglishWord) => void;
@@ -11,6 +13,7 @@ const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const { isAuthenticated } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +29,21 @@ const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
     
     try {
       const registeredWord = await wordService.registerWord(word);
+      
+      // ログイン中であれば自動的にマイリストに追加
+      if (isAuthenticated && registeredWord.id) {
+        try {
+          await userWordService.addWordToUserList(registeredWord.id);
+          setSuccess('単語を登録し、マイリストに追加しました。意味や例文は自動的に取得されます。');
+        } catch (addError) {
+          console.error('マイリストへの追加に失敗しました', addError);
+          setSuccess('単語を登録しました。意味や例文は自動的に取得されます。（マイリストへの追加に失敗しました）');
+        }
+      } else {
+        setSuccess('単語を登録しました。意味や例文は自動的に取得されます。');
+      }
+      
       setWord('');
-      setSuccess('単語を登録しました。意味や例文は自動的に取得されます。');
       
       if (onWordRegistered) {
         onWordRegistered(registeredWord);
@@ -62,7 +78,7 @@ const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
           placeholder="登録したい英単語を入力"
           required
         />
-        <small className="text-muted">※意味や例文は自動的に取得されます</small>
+        <small className="text-muted">※意味や例文は自動的に取得されます{isAuthenticated && '（登録するとマイリストに自動追加されます）'}</small>
       </div>
       
       <button 

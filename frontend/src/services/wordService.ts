@@ -10,6 +10,7 @@ export const wordService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ word }),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -20,7 +21,9 @@ export const wordService = {
   },
   
   getAllWords: async (): Promise<EnglishWord[]> => {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch words');
@@ -30,7 +33,9 @@ export const wordService = {
   },
   
   getWordById: async (id: number): Promise<EnglishWord> => {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await fetch(`${API_URL}/${id}`, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch word');
@@ -40,7 +45,9 @@ export const wordService = {
   },
   
   findWordByText: async (word: string): Promise<EnglishWord> => {
-    const response = await fetch(`${API_URL}/search?word=${encodeURIComponent(word)}`);
+    const response = await fetch(`${API_URL}/search?word=${encodeURIComponent(word)}`, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('Word not found');
@@ -52,6 +59,7 @@ export const wordService = {
   deleteWord: async (id: number): Promise<boolean> => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     
     return response.ok;
@@ -71,6 +79,7 @@ export const wordService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ example, translation, note, source }),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -81,7 +90,9 @@ export const wordService = {
   },
   
   getExamples: async (wordId: number): Promise<WordExample[]> => {
-    const response = await fetch(`${API_URL}/${wordId}/examples`);
+    const response = await fetch(`${API_URL}/${wordId}/examples`, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('Failed to fetch examples');
@@ -104,6 +115,7 @@ export const wordService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ example, translation, note, source }),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -116,6 +128,7 @@ export const wordService = {
   deleteExample: async (wordId: number, exampleId: number): Promise<boolean> => {
     const response = await fetch(`${API_URL}/${wordId}/examples/${exampleId}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     
     return response.ok;

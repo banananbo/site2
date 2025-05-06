@@ -1,10 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import LoginButton from './LoginButton';
 
 const TopBar: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
+  const [showEnglishMenu, setShowEnglishMenu] = useState(false);
+
+  const toggleEnglishMenu = () => {
+    setShowEnglishMenu(!showEnglishMenu);
+  };
 
   return (
     <div className="top-bar">
@@ -13,7 +18,19 @@ const TopBar: React.FC = () => {
           <Link to="/">banananbo.com</Link>
         </div>
         <div className="top-bar-menu">
-          <Link to="/english-study" className="menu-link">英単語学習</Link>
+          <div className="dropdown">
+            <button className="menu-link dropdown-toggle" onClick={toggleEnglishMenu}>
+              英単語学習
+            </button>
+            {showEnglishMenu && (
+              <div className="dropdown-menu">
+                <Link to="/english-study" className="dropdown-item" onClick={toggleEnglishMenu}>全単語リスト</Link>
+                {isAuthenticated && (
+                  <Link to="/english-study/my-words" className="dropdown-item" onClick={toggleEnglishMenu}>マイ単語リスト</Link>
+                )}
+              </div>
+            )}
+          </div>
           <Link to="/sentences" className="menu-link">センテンス</Link>
         </div>
         <div className="top-bar-right">

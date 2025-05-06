@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { wordService } from '../services/wordService';
+import { userWordService } from '../services/userWordService';
 import { EnglishWord, WordExample } from '../types/EnglishWord';
 
 const styles = {
@@ -122,6 +123,26 @@ const styles = {
     padding: '1rem',
     borderRadius: '4px',
     marginBottom: '1rem'
+  },
+  saveButton: {
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '0.5rem 1rem',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    marginLeft: '1rem'
+  },
+  removeButton: {
+    backgroundColor: '#dc3545',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '0.5rem 1rem',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    marginLeft: '1rem'
   }
 };
 
@@ -139,6 +160,8 @@ const WordDetail: React.FC = () => {
   const [word, setWord] = useState<EnglishWord | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingLoading, setSavingLoading] = useState(false);
   
   const [newExample, setNewExample] = useState<ExampleFormData>({
     example: '',
@@ -164,6 +187,10 @@ const WordDetail: React.FC = () => {
     try {
       const wordData = await wordService.getWordById(parseInt(wordId, 10));
       setWord(wordData);
+      
+      // 単語がユーザーのリストに保存されているか確認
+      const isInUserList = await userWordService.checkWordInUserList(parseInt(wordId, 10));
+      setIsSaved(isInUserList);
     } catch (err) {
       setError('単語の詳細情報の取得に失敗しました');
       console.error(err);
@@ -260,6 +287,44 @@ const WordDetail: React.FC = () => {
     }
   };
   
+  const handleSaveWord = async () => {
+    if (!wordId) return;
+    
+    setSavingLoading(true);
+    try {
+      const success = await userWordService.addWordToUserList(parseInt(wordId, 10));
+      if (success) {
+        setIsSaved(true);
+      } else {
+        setError('単語の保存に失敗しました');
+      }
+    } catch (err) {
+      setError('単語の保存に失敗しました');
+      console.error(err);
+    } finally {
+      setSavingLoading(false);
+    }
+  };
+  
+  const handleRemoveWord = async () => {
+    if (!wordId || !window.confirm('この単語をマイリストから削除しますか？')) return;
+    
+    setSavingLoading(true);
+    try {
+      const success = await userWordService.removeWordFromUserList(parseInt(wordId, 10));
+      if (success) {
+        setIsSaved(false);
+      } else {
+        setError('単語の削除に失敗しました');
+      }
+    } catch (err) {
+      setError('単語の削除に失敗しました');
+      console.error(err);
+    } finally {
+      setSavingLoading(false);
+    }
+  };
+  
   if (loading) {
     return <div style={styles.loading}>読み込み中...</div>;
   }
@@ -275,13 +340,29 @@ const WordDetail: React.FC = () => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <button 
-          style={styles.backButton}
-          onClick={() => navigate('/english-study')}
-        >
-          ← 戻る
-        </button>
-        <h1 style={styles.word}>{word.word}</h1>
+        <div>
+          <button onClick={() => navigate(-1)} style={styles.backButton}>戻る</button>
+          <h1 style={styles.word}>{word.word}</h1>
+        </div>
+        <div>
+          {isSaved ? (
+            <button
+              onClick={handleRemoveWord}
+              style={styles.removeButton}
+              disabled={savingLoading}
+            >
+              {savingLoading ? '処理中...' : 'マイリストから削除'}
+            </button>
+          ) : (
+            <button
+              onClick={handleSaveWord}
+              style={styles.saveButton}
+              disabled={savingLoading}
+            >
+              {savingLoading ? '処理中...' : 'マイリストに保存'}
+            </button>
+          )}
+        </div>
       </div>
       
       {word.meaning && (

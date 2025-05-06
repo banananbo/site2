@@ -14,10 +14,6 @@ class FlywayConfig {
     fun flywayMigrationStrategy(): FlywayMigrationStrategy {
         return FlywayMigrationStrategy { flyway ->
             try {
-                // データベースを完全にクリーンアップ
-                val cleanResult = flyway.clean()
-                logger.info("Database cleaned: {}", cleanResult)
-                
                 // 修復を実行
                 val repairResult = flyway.repair()
                 logger.info("Database repaired: {}", repairResult)

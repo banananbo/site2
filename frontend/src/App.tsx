@@ -9,6 +9,7 @@ import { AuthProvider } from './context/AuthContext';
 import TopBar from './components/TopBar';
 import WordForm from './components/WordForm';
 import WordList from './components/WordList';
+import UserWordList from './components/UserWordList';
 import WordDetail from './components/WordDetail';
 import { EnglishWord } from './types/EnglishWord';
 
@@ -30,6 +31,16 @@ const EnglishStudyPage: React.FC = () => {
   );
 };
 
+// マイ単語リストページのコンポーネント
+const MyWordListPage: React.FC = () => {
+  return (
+    <div className="english-study-page">
+      <h1>英単語学習アプリ</h1>
+      <UserWordList />
+    </div>
+  );
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -41,7 +52,8 @@ const App: React.FC = () => {
             <Route path="/callback" element={<CallbackPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/english-study" element={<EnglishStudyPage />} />
-            <Route path="/english-study/words/:wordId" element={<WordDetail />} />
+            <Route path="/english-study/my-words" element={<MyWordListPage />} />
+            <Route path="/words/:wordId" element={<WordDetail />} />
             <Route path="/sentences" element={<SentencePage />} />
           </Routes>
         </main>

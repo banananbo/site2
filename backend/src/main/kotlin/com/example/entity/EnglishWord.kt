@@ -33,5 +33,12 @@ data class EnglishWord(
         joinColumns = [JoinColumn(name = "word_id")],
         inverseJoinColumns = [JoinColumn(name = "example_id")]
     )
-    val examples: List<WordExample> = emptyList()
-) 
+    val examples: List<WordExample> = emptyList(),
+    
+    @OneToMany(mappedBy = "word", cascade = [CascadeType.ALL], orphanRemoval = true)
+    val userWordRelations: MutableList<UserWordRelation> = mutableListOf()
+) {
+    // この単語に関連付けられたユーザーのリスト
+    val users: List<User>
+        get() = userWordRelations.map { it.user }
+} 
