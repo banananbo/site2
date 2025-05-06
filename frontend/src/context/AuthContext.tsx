@@ -8,13 +8,22 @@ interface TokenInfo {
   name?: string;
 }
 
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  picture?: string;
+}
+
 interface AuthContextType {
   isAuthenticated: boolean;
   authCode: string | null;
   tokenInfo: TokenInfo | null;
+  user: UserProfile | null;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setAuthCode: (code: string | null) => void;
   setTokenInfo: (tokenInfo: TokenInfo | null) => void;
+  setUser: (user: UserProfile | null) => void;
   logout: () => void;
   login: () => void;
 }
@@ -34,7 +43,8 @@ const getInitialAuthState = () => {
   return {
     isAuthenticated: false,
     authCode: null,
-    tokenInfo: null
+    tokenInfo: null,
+    user: null
   };
 };
 
@@ -43,15 +53,43 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(initialState.isAuthenticated);
   const [authCode, setAuthCode] = useState<string | null>(initialState.authCode);
   const [tokenInfo, setTokenInfo] = useState<TokenInfo | null>(initialState.tokenInfo);
+  const [user, setUser] = useState<UserProfile | null>(initialState.user);
 
   // 認証状態が変化したらLocalStorageに保存
   useEffect(() => {
     localStorage.setItem('auth', JSON.stringify({
       isAuthenticated,
       authCode,
-      tokenInfo
+      tokenInfo,
+      user
     }));
-  }, [isAuthenticated, authCode, tokenInfo]);
+  }, [isAuthenticated, authCode, tokenInfo, user]);
+
+  // ユーザー情報の取得
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!isAuthenticated) return;
+
+      try {
+        const response = await fetch('/api/user/me', {
+          credentials: 'include'
+        });
+
+        if (!response.ok) {
+          throw new Error(`APIエラー: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setUser(data);
+      } catch (err) {
+        console.error('ユーザー情報の取得に失敗しました', err);
+      }
+    };
+
+    if (isAuthenticated && !user) {
+      fetchUserProfile();
+    }
+  }, [isAuthenticated, user]);
 
   const login = async () => {
     try {
@@ -78,6 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setIsAuthenticated(false);
       setAuthCode(null);
       setTokenInfo(null);
+      setUser(null);
       
       // Auth0のログアウトURLを取得してリダイレクト
       const response = await fetch('/api/auth/logout-url');
@@ -97,9 +136,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isAuthenticated,
         authCode,
         tokenInfo,
+        user,
         setIsAuthenticated,
         setAuthCode,
         setTokenInfo,
+        setUser,
         logout,
         login
       }}

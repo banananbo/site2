@@ -24,22 +24,17 @@ const TopBar: React.FC = () => {
             </button>
             {showEnglishMenu && (
               <div className="dropdown-menu">
-                <Link to="/english-study" className="dropdown-item" onClick={toggleEnglishMenu}>全単語リスト</Link>
-                {isAuthenticated && (
-                  <>
-                    <Link to="/english-study/my-words" className="dropdown-item" onClick={toggleEnglishMenu}>マイ単語リスト</Link>
-                    <Link to="/english-study/my-sentences" className="dropdown-item" onClick={toggleEnglishMenu}>マイセンテンスリスト</Link>
-                  </>
-                )}
+                <Link to="/english-study" className="dropdown-item" onClick={toggleEnglishMenu}>単語学習</Link>
               </div>
             )}
           </div>
-          <Link to="/sentences" className="menu-link">センテンス</Link>
+          {isAuthenticated && (
+            <Link to="/profile" className="menu-link">マイページ</Link>
+          )}
         </div>
         <div className="top-bar-right">
           {isAuthenticated ? (
             <div className="user-menu">
-              <Link to="/profile" className="profile-link">プロフィール</Link>
               <button className="logout-button" onClick={logout}>ログアウト</button>
             </div>
           ) : (

@@ -4,13 +4,10 @@ import './App.css';
 import HomePage from './pages/HomePage';
 import CallbackPage from './pages/CallbackPage';
 import ProfilePage from './pages/ProfilePage';
-import SentencePage from './pages/SentencePage';
 import { AuthProvider } from './context/AuthContext';
 import TopBar from './components/TopBar';
 import WordForm from './components/WordForm';
 import WordList from './components/WordList';
-import UserWordList from './components/UserWordList';
-import UserSentenceList from './components/UserSentenceList';
 import WordDetail from './components/WordDetail';
 import SentenceForm from './components/SentenceForm';
 import SentenceList from './components/SentenceList';
@@ -142,54 +139,6 @@ const EnglishStudyPage: React.FC = () => {
   );
 };
 
-// マイ単語リストページのコンポーネント
-const MyWordListPage: React.FC = () => {
-  const styles = {
-    container: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '20px',
-    },
-    header: {
-      marginBottom: '32px',
-      textAlign: 'center' as const,
-      color: '#333',
-      fontWeight: 600 as const,
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>マイ単語リスト</h1>
-      <UserWordList />
-    </div>
-  );
-};
-
-// マイセンテンスリストページのコンポーネント
-const MySentenceListPage: React.FC = () => {
-  const styles = {
-    container: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '20px',
-    },
-    header: {
-      marginBottom: '32px',
-      textAlign: 'center' as const,
-      color: '#333',
-      fontWeight: 600 as const,
-    }
-  };
-
-  return (
-    <div style={styles.container}>
-      <h1 style={styles.header}>マイセンテンスリスト</h1>
-      <UserSentenceList />
-    </div>
-  );
-};
-
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -201,10 +150,7 @@ const App: React.FC = () => {
             <Route path="/callback" element={<CallbackPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/english-study" element={<EnglishStudyPage />} />
-            <Route path="/english-study/my-words" element={<MyWordListPage />} />
-            <Route path="/english-study/my-sentences" element={<MySentenceListPage />} />
             <Route path="/words/:wordId" element={<WordDetail />} />
-            <Route path="/sentences" element={<SentencePage />} />
           </Routes>
         </main>
       </Router>
