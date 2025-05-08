@@ -273,6 +273,15 @@ summary {
   padding-right: 20px;
 }
 
+/* App content padding for fixed header */
+.app-content {
+  padding-top: 80px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 20px;
+  padding-right: 20px;
+}
+
 /* プロフィールページのスタイル */
 .profile-page {
   max-width: 800px;

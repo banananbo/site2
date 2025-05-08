@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  traefik:
+    image: traefik:v2.9
+    container_name: compose-traefik
+    ports:
+      - "80:80"
+      - "8082:8080"
+    environment:
+      - HOST_DOMAIN=${HOST_DOMAIN}
+      - HOST_FRONTEND=${HOST_FRONTEND}
+      - HOST_BACKEND=${HOST_BACKEND}
+      - HOST_REDIS=${HOST_REDIS}
+      - HOST_ADMINER=${HOST_ADMINER}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--log.level=DEBUG"
+
+  frontend:
+    labels:
+      - "traefik.http.routers.frontend.entrypoints=web"
+      - "traefik.http.routers.frontend.rule=Host(`${HOST_DOMAIN}`)"
+
+  backend:
+    labels:
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.rule=Host(`${HOST_BACKEND}`)"
+
+  redis-commander:
+    labels:
+      - "traefik.http.routers.redis.entrypoints=web"
+      - "traefik.http.routers.redis.rule=Host(`${HOST_REDIS}`)"
+
+  adminer:
+    labels:
+      - "traefik.http.routers.adminer.entrypoints=web"
+      - "traefik.http.routers.adminer.rule=Host(`${HOST_ADMINER}`)" 

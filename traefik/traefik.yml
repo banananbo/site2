@@ -5,11 +5,27 @@ api:
 entryPoints:
   web:
     address: ":80"
+  
+  # HTTPS用エントリーポイント（本番環境用）
+  websecure:
+    address: ":443"
+
+# 証明書設定（本番環境用）
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: ${ACME_EMAIL:-admin@example.com}
+      storage: /etc/traefik/acme/acme.json
+      httpChallenge:
+        entryPoint: web
 
 providers:
   docker:
     endpoint: "unix:///var/run/docker.sock"
     exposedByDefault: false
+  file:
+    directory: /etc/traefik/dynamic
+    watch: true
 
 log:
   level: DEBUG 

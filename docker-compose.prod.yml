@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  traefik:
+    environment:
+      - ACME_EMAIL=${PROD_EMAIL}
+    volumes:
+      - ./traefik/acme:/etc/traefik/acme
+      - ./traefik/dynamic:/etc/traefik/dynamic
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.file.directory=/etc/traefik/dynamic"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entryPoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${PROD_EMAIL}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/etc/traefik/acme/acme.json"
+      - "--log.level=INFO"
+
+  frontend:
+    labels:
+      - "traefik.http.routers.frontend.rule=Host(`${PROD_DOMAIN}`)"
+      - "traefik.http.routers.frontend.entrypoints=websecure"
+      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+
+  backend:
+    labels:
+      - "traefik.http.routers.backend.rule=Host(`api.${PROD_DOMAIN}`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+
+  redis-commander:
+    labels:
+      - "traefik.http.routers.redis.rule=Host(`redis.${PROD_DOMAIN}`)"
+      - "traefik.http.routers.redis.entrypoints=websecure"
+      - "traefik.http.routers.redis.tls.certresolver=letsencrypt"
+
+  adminer:
+    labels:
+      - "traefik.http.routers.adminer.rule=Host(`adminer.${PROD_DOMAIN}`)"
+      - "traefik.http.routers.adminer.entrypoints=websecure"
+      - "traefik.http.routers.adminer.tls.certresolver=letsencrypt" 

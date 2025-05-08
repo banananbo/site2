@@ -76,10 +76,23 @@ const styles = {
     marginRight: '1rem'
   },
   addExampleForm: {
-    marginBottom: '2rem',
+    marginTop: '2rem',
     backgroundColor: '#f8f9fa',
     padding: '1rem',
-    borderRadius: '4px'
+    borderRadius: '4px',
+    border: '1px solid #ced4da'
+  },
+  addExampleButton: {
+    backgroundColor: '#28a745',
+    color: 'white',
+    border: 'none',
+    borderRadius: '4px',
+    padding: '0.5rem 1rem',
+    fontSize: '1rem',
+    cursor: 'pointer',
+    marginTop: '1rem',
+    display: 'flex',
+    alignItems: 'center'
   },
   formGroup: {
     marginBottom: '1rem'
@@ -162,6 +175,7 @@ const WordDetail: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [savingLoading, setSavingLoading] = useState(false);
+  const [showAddExampleForm, setShowAddExampleForm] = useState(false);
   
   const [newExample, setNewExample] = useState<ExampleFormData>({
     example: '',
@@ -371,60 +385,6 @@ const WordDetail: React.FC = () => {
         </div>
       )}
       
-      <div style={styles.addExampleForm}>
-        <h3>新しい例文を追加</h3>
-        <form onSubmit={handleAddExample}>
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="new-example">例文:</label>
-            <textarea
-              id="new-example"
-              style={styles.textarea}
-              value={newExample.example}
-              onChange={(e) => setNewExample({...newExample, example: e.target.value})}
-              placeholder="英語の例文を入力してください"
-              required
-            />
-          </div>
-          
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="new-translation">日本語訳:</label>
-            <textarea
-              id="new-translation"
-              style={{...styles.textarea, minHeight: '80px'}}
-              value={newExample.translation}
-              onChange={(e) => setNewExample({...newExample, translation: e.target.value})}
-              placeholder="例文の日本語訳を入力してください"
-            />
-          </div>
-          
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="new-note">メモ:</label>
-            <input
-              type="text"
-              id="new-note"
-              style={styles.input}
-              value={newExample.note}
-              onChange={(e) => setNewExample({...newExample, note: e.target.value})}
-            />
-          </div>
-          
-          <div style={styles.formGroup}>
-            <label style={styles.label} htmlFor="new-source">出典:</label>
-            <input
-              type="text"
-              id="new-source"
-              style={styles.input}
-              value={newExample.source}
-              onChange={(e) => setNewExample({...newExample, source: e.target.value})}
-            />
-          </div>
-          
-          <button type="submit" style={styles.submitButton}>
-            例文を追加
-          </button>
-        </form>
-      </div>
-      
       <h2 style={styles.sectionTitle}>例文一覧</h2>
       
       {word.examples.length === 0 ? (
@@ -522,6 +482,68 @@ const WordDetail: React.FC = () => {
             )}
           </div>
         ))
+      )}
+
+      <button 
+        style={styles.addExampleButton} 
+        onClick={() => setShowAddExampleForm(!showAddExampleForm)}
+      >
+        {showAddExampleForm ? '▲ 例文追加フォームを閉じる' : '▼ 例文を追加する'}
+      </button>
+      
+      {showAddExampleForm && (
+        <div style={styles.addExampleForm}>
+          <form onSubmit={handleAddExample}>
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="new-example">例文:</label>
+              <textarea
+                id="new-example"
+                style={styles.textarea}
+                value={newExample.example}
+                onChange={(e) => setNewExample({...newExample, example: e.target.value})}
+                placeholder="英語の例文を入力してください"
+                required
+              />
+            </div>
+            
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="new-translation">日本語訳:</label>
+              <textarea
+                id="new-translation"
+                style={{...styles.textarea, minHeight: '80px'}}
+                value={newExample.translation}
+                onChange={(e) => setNewExample({...newExample, translation: e.target.value})}
+                placeholder="例文の日本語訳を入力してください"
+              />
+            </div>
+            
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="new-note">メモ:</label>
+              <input
+                type="text"
+                id="new-note"
+                style={styles.input}
+                value={newExample.note}
+                onChange={(e) => setNewExample({...newExample, note: e.target.value})}
+              />
+            </div>
+            
+            <div style={styles.formGroup}>
+              <label style={styles.label} htmlFor="new-source">出典:</label>
+              <input
+                type="text"
+                id="new-source"
+                style={styles.input}
+                value={newExample.source}
+                onChange={(e) => setNewExample({...newExample, source: e.target.value})}
+              />
+            </div>
+            
+            <button type="submit" style={styles.submitButton}>
+              例文を追加
+            </button>
+          </form>
+        </div>
       )}
     </div>
   );
