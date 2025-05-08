@@ -72,6 +72,24 @@ const styles = {
     backgroundColor: '#6c757d',
     cursor: 'not-allowed',
   },
+  loginMessage: {
+    textAlign: 'center' as const,
+    padding: '20px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '4px',
+    marginBottom: '16px',
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '4px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginTop: '15px',
+    transition: 'background-color 0.15s ease-in-out',
+  },
 };
 
 const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
@@ -80,7 +98,7 @@ const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [inputFocused, setInputFocused] = useState(false);
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,6 +140,27 @@ const WordForm: React.FC<WordFormProps> = ({ onWordRegistered }) => {
       setLoading(false);
     }
   };
+
+  // ログインしていない場合はログインを促すメッセージを表示
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.loginMessage}>
+        <p>英単語を登録するにはログインしてください。</p>
+        <button 
+          style={styles.loginButton} 
+          onClick={login}
+          onMouseOver={(e) => {
+            e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor;
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.backgroundColor = styles.button.backgroundColor;
+          }}
+        >
+          ログイン
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} style={styles.form}>

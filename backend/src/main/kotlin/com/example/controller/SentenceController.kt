@@ -2,7 +2,9 @@ package com.example.controller
 
 import com.example.dto.*
 import com.example.service.SentenceService
+import com.example.service.SessionService
 import com.example.common.DifficultyLevel
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -10,12 +12,23 @@ import java.time.format.DateTimeFormatter
 
 @RestController
 @RequestMapping("/api/sentences")
-class SentenceController(private val sentenceService: SentenceService) {
+class SentenceController(
+    private val sentenceService: SentenceService,
+    private val sessionService: SessionService
+) {
 
     private val dateFormatter = DateTimeFormatter.ISO_DATE_TIME
 
     @PostMapping
-    fun registerSentence(@RequestBody request: SentenceRequest): ResponseEntity<SentenceResponse> {
+    fun registerSentence(
+        @RequestBody request: SentenceRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<SentenceResponse> {
+        // 認証チェック
+        if (!sessionService.isLoggedIn(httpRequest)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+        
         val registeredSentence = sentenceService.registerSentence(
             text = request.text,
             translation = request.translation,

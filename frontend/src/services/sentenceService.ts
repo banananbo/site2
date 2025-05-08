@@ -11,6 +11,7 @@ export const sentenceService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(sentenceRequest),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -22,7 +23,9 @@ export const sentenceService = {
   
   // 全てのセンテンスを取得する
   getAllSentences: async (): Promise<Sentence[]> => {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('センテンスの取得に失敗しました');
@@ -33,7 +36,9 @@ export const sentenceService = {
   
   // IDによるセンテンスの取得
   getSentenceById: async (id: number): Promise<Sentence> => {
-    const response = await fetch(`${API_URL}/${id}`);
+    const response = await fetch(`${API_URL}/${id}`, {
+      credentials: 'include'
+    });
     
     if (!response.ok) {
       throw new Error('センテンスの取得に失敗しました');
@@ -50,6 +55,7 @@ export const sentenceService = {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(sentenceRequest),
+      credentials: 'include'
     });
     
     if (!response.ok) {
@@ -63,6 +69,7 @@ export const sentenceService = {
   deleteSentence: async (id: number): Promise<boolean> => {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
+      credentials: 'include'
     });
     
     return response.ok;

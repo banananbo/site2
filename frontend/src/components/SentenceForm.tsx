@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { sentenceService } from '../services/sentenceService';
 import { SentenceRequest } from '../types/Sentence';
+import { useAuth } from '../context/AuthContext';
 
 interface SentenceFormProps {
   onSentenceAdded?: () => void;
@@ -115,6 +116,24 @@ const styles = {
     opacity: 0.65,
     cursor: 'not-allowed' as const,
   },
+  loginMessage: {
+    textAlign: 'center' as const,
+    padding: '20px',
+    backgroundColor: '#f8f9fa',
+    borderRadius: '4px',
+    margin: '20px',
+  },
+  loginButton: {
+    backgroundColor: '#007bff',
+    color: 'white',
+    border: 'none',
+    padding: '10px 20px',
+    borderRadius: '4px',
+    fontSize: '16px',
+    cursor: 'pointer',
+    marginTop: '15px',
+    transition: 'background-color 0.15s ease-in-out',
+  },
 };
 
 const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
@@ -126,6 +145,7 @@ const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
   const [isTextAreaFocused, setIsTextAreaFocused] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const { isAuthenticated, login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -163,6 +183,40 @@ const SentenceForm: React.FC<SentenceFormProps> = ({ onSentenceAdded }) => {
       setIsSubmitting(false);
     }
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div style={styles.container}>
+        <div style={styles.header}>
+          <h5 style={styles.title}>新しいセンテンスを登録</h5>
+        </div>
+        <div style={styles.loginMessage}>
+          <p>センテンスを登録するにはログインしてください。</p>
+          <button 
+            style={styles.loginButton} 
+            onClick={login}
+            onMouseEnter={() => {
+              const button = document.querySelector('[data-login-button]') as HTMLButtonElement;
+              if (button) {
+                button.style.backgroundColor = styles.buttonHover.backgroundColor;
+                button.style.borderColor = styles.buttonHover.borderColor;
+              }
+            }}
+            onMouseLeave={() => {
+              const button = document.querySelector('[data-login-button]') as HTMLButtonElement;
+              if (button) {
+                button.style.backgroundColor = styles.button.backgroundColor;
+                button.style.borderColor = styles.button.borderColor;
+              }
+            }}
+            data-login-button
+          >
+            ログイン
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.container}>

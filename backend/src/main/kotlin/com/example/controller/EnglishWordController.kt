@@ -5,7 +5,9 @@ import com.example.dto.EnglishWordRequest
 import com.example.dto.EnglishWordResponse
 import com.example.dto.WordExampleResponse
 import com.example.service.EnglishWordService
+import com.example.service.SessionService
 import com.example.service.WordExampleService
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -14,11 +16,20 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/api/words")
 class EnglishWordController(
     private val englishWordService: EnglishWordService,
-    private val wordExampleService: WordExampleService
+    private val wordExampleService: WordExampleService,
+    private val sessionService: SessionService
 ) {
 
     @PostMapping
-    fun registerWord(@RequestBody request: EnglishWordRequest): ResponseEntity<EnglishWordResponse> {
+    fun registerWord(
+        @RequestBody request: EnglishWordRequest,
+        httpRequest: HttpServletRequest
+    ): ResponseEntity<EnglishWordResponse> {
+        // 認証チェック
+        if (!sessionService.isLoggedIn(httpRequest)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()
+        }
+        
         val registeredWord = englishWordService.registerWord(request.word)
         
         val examples = if (registeredWord.id != null) {

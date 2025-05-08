@@ -49,11 +49,9 @@ const HomePage: React.FC = () => {
       <TopBar />
       
       <div className="content-container">
-        <h1>ようこそ、banananbo.comへ</h1>
         
         {!isAuthenticated ? (
           <div className="welcome-section">
-            <p>banananbo.comは、あなたのオンラインプラットフォームです。</p>
             <p>ログインして、すべての機能にアクセスしてください。</p>
           </div>
         ) : (
