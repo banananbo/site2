@@ -92,6 +92,8 @@ services:
     build: ./frontend
     container_name: frontend
     env_file: .env
+    environment:
+      HOST_FRONTEND: lvh.me
     depends_on:
       - backend
     restart: on-failure

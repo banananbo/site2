@@ -1,17 +1,11 @@
 #!/bin/sh
-
-# HTMLファイル内の環境変数のプレースホルダーを実際の値に置換するスクリプト
 set -e
 
-# 環境変数から設定を置換
-echo "Replacing environment variables in JS files..."
-for file in /usr/share/nginx/html/static/js/*.js
-do
-  if [ -f $file ]; then
-    echo "Processing $file..."
-    sed -i 's|REACT_APP_API_URL_PLACEHOLDER|'"${REACT_APP_API_URL}"'|g' $file
-  fi
-done
+# 環境変数のデフォルト値設定
+: "${HOST_FRONTEND:=localhost}"
 
-echo "Starting Nginx..."
+# 環境変数をnginx設定ファイルに展開
+envsubst '${HOST_FRONTEND}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
+
+# 標準のnginxエントリポイントコマンドを実行
 exec "$@" 

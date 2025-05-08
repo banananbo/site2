@@ -11,36 +11,36 @@ class ApiLog(
     val id: Long? = null,
     
     // リクエスト情報
-    @Column(nullable = false)
+    @Column(name = "api_name", nullable = false)
     val apiName: String,
     
     @Column(nullable = false)
     val endpoint: String,
     
-    @Column(nullable = false, length = 3000)
+    @Column(name = "request_body", nullable = false, length = 3000)
     val requestBody: String,
     
     // レスポンス情報
-    @Column(length = 5000)
+    @Column(name = "response_body", length = 5000)
     val responseBody: String? = null,
     
     @Column(nullable = false)
     val successful: Boolean = false,
     
-    @Column(length = 1000)
+    @Column(name = "error_message", length = 1000)
     val errorMessage: String? = null,
     
     // 実行時間情報
-    @Column(nullable = false)
+    @Column(name = "request_timestamp", nullable = false)
     val requestTimestamp: LocalDateTime = LocalDateTime.now(),
     
-    @Column
+    @Column(name = "response_timestamp")
     val responseTimestamp: LocalDateTime? = null,
     
-    @Column
+    @Column(name = "execution_time_ms")
     val executionTimeMs: Long? = null,
     
     // 関連データ
-    @Column
+    @Column(name = "word_id")
     val wordId: Long? = null
 ) 
