@@ -10,7 +10,7 @@ data class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
     
-    @Column(unique = true, nullable = false)
+    @Column(name = "auth0_id", unique = true, nullable = false)
     val auth0Id: String,
     
     @Column(nullable = false)
@@ -19,13 +19,13 @@ data class User(
     @Column(nullable = true)
     var name: String? = null,
     
-    @Column(nullable = false)
+    @Column(name = "last_logined_at", nullable = false)
     var lastLoginedAt: LocalDateTime = LocalDateTime.now(),
     
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     val createdAt: LocalDateTime = LocalDateTime.now(),
     
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     var updatedAt: LocalDateTime = LocalDateTime.now(),
     
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)

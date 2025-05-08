@@ -29,12 +29,16 @@ class UserService(
         val email = jwt.getClaim("email").asString() ?: throw RuntimeException("メールアドレスが取得できません")
         val name = jwt.getClaim("name").asString()
         
+        val now = LocalDateTime.now()
         val user = userRepository.findByAuth0Id(auth0Id).orElseGet {
             // 新規ユーザーを作成
             val newUser = User(
                 auth0Id = auth0Id,
                 email = email,
-                name = name
+                name = name,
+                lastLoginedAt = now,
+                createdAt = now,
+                updatedAt = now
             )
             userRepository.save(newUser)
         }

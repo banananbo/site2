@@ -17,9 +17,9 @@ data class AccessToken(
     @Column(nullable = false, length = 2000)
     val token: String,
     
-    @Column(nullable = false)
+    @Column(name = "expires_at", nullable = false)
     val expiresAt: LocalDateTime,
     
-    @Column(nullable = false)
+    @Column(name = "created_at", nullable = false)
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) 
